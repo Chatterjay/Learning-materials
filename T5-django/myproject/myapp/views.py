@@ -22,7 +22,7 @@ def line_chart_view(request):
 
 def line_chart_view2(req):
     # 读取CSV文件
-    df = pd.read_csv(r"D:\PyDemo\T5\data\mds.csv")
+    df = pd.read_csv(r"/T5-django\data\mds.csv")
     df.dropna(inplace=True)
 
     # 按日期排序
@@ -31,10 +31,10 @@ def line_chart_view2(req):
     df.reset_index(drop=True, inplace=True)
     df['年份'] = df['日期'].dt.year
 
-    # 分别获取中成药和西药的销售额
+    # 分别获取中成药和西药的数据
     df_chinese = df[df['药品类型'] == '中成药']
     df_western = df[df['药品类型'] == '西药']
-    # 每年总和
+    # 求每年销售额的总和
     chinese_sales = df_chinese.groupby('年份')['销售额'].sum().reset_index()
     western_sales = df_western.groupby('年份')['销售额'].sum().reset_index()
 
@@ -42,7 +42,7 @@ def line_chart_view2(req):
     data_chinese:list = chinese_sales['销售额'].tolist()
     data_western:list = western_sales['销售额'].tolist()
 
-
+    print(data_chinese, data_western)
     # 创建堆叠面积图
     line = (
         Line(init_opts=opts.InitOpts(theme=ThemeType.LIGHT))
@@ -65,7 +65,7 @@ def line_chart_view2(req):
 
 # 热力图
 def heat_map(req):
-    df = pd.read_csv(r"D:\PyDemo\T5\data\cold_cases.csv")
+    df = pd.read_csv(r"/T5-django\data\cold_cases.csv")
     df.dropna(inplace=True)
 
     # 年份月份排序
