@@ -26,16 +26,22 @@ def line_chart_view2(req):
     df.dropna(inplace=True)
 
     # 按日期排序
+    df['日期'] = pd.to_datetime(df['日期'])
     df.sort_values(by='日期', inplace=True)
     df.reset_index(drop=True, inplace=True)
+    df['年份'] = df['日期'].dt.year
 
     # 分别获取中成药和西药的销售额
-    x = df['日期'].head(100).tolist()
     df_chinese = df[df['药品类型'] == '中成药']
     df_western = df[df['药品类型'] == '西药']
+    # 每年总和
+    chinese_sales = df_chinese.groupby('年份')['销售额'].sum().reset_index()
+    western_sales = df_western.groupby('年份')['销售额'].sum().reset_index()
 
-    data_chinese = df_chinese['销售额'].head(100).tolist()
-    data_western = df_western['销售额'].head(100).tolist()
+    x = chinese_sales['年份'].tolist()
+    data_chinese:list = chinese_sales['销售额'].tolist()
+    data_western:list = western_sales['销售额'].tolist()
+
 
     # 创建堆叠面积图
     line = (
@@ -73,7 +79,7 @@ def heat_map(req):
     for year in years:
         for month in months:
             cases = df[(df['年份'] == year) & (df['月份'] == month)]['感冒病例数']
-            heatmap_data.append([years.index(year),months.index(month),int(cases)])
+            heatmap_data.append([years.index(year), months.index(month), int(cases)])
 
     heatmap = (
         HeatMap(init_opts=opts.InitOpts(theme=ThemeType.LIGHT))
@@ -84,4 +90,4 @@ def heat_map(req):
             visualmap_opts=opts.VisualMapOpts(max_=max(df['感冒病例数']), min_=min(df['感冒病例数']))
         )
     )
-    return render(req,'heat_map.html',{'heatmap':heatmap.render_embed()})
+    return render(req, 'heat_map.html', {'heatmap': heatmap.render_embed()})
